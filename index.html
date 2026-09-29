@@ -1233,10 +1233,11 @@
       opacity: 1;
     }
   </style>
-  <link rel="manifest" href="data:application/manifest+json;utf-8,%7B%22name%22%3A%22Productivity%20Hub%22%2C%22short_name%22%3A%22ProdHub%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f8fafc%22%2C%22theme_color%22%3A%22%230f766e%22%7D">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="ProductivityHub">
+  <link rel="manifest" href="data:application/manifest+json;utf-8,%7B%22name%22%3A%22Productivity%20Hub%22%2C%22short_name%22%3A%22ProdHub%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22fullscreen%22%2C%22background_color%22%3A%22%23f8fafc%22%2C%22theme_color%22%3A%22%230f766e%22%7D">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ProductivityHub">
 </head>
 <body>
 
@@ -1257,12 +1258,19 @@
             <span class="greeting-pill" id="live-greeting">Semangat Pagi! ⚡</span>
           </div>
         </div>
-        <button class="btn-icon" id="btn-quick-theme" title="Hari Ini" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.15); color: #fff;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-          </svg>
-        </button>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button class="btn-icon" id="btn-toggle-fullscreen" title="Layar Penuh (Sembunyikan URL & Tab)" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.15); color: #fff;">
+            <svg id="fullscreen-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+            </svg>
+          </button>
+          <button class="btn-icon" id="btn-quick-theme" title="Hari Ini" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.15); color: #fff;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <!-- Ringkasan Statistik Cepat -->
@@ -2332,12 +2340,83 @@
       }
 
       // ==========================================
+      // FULLSCREEN & IMMERSIVE VIEW
+      // ==========================================
+      function isFullscreen() {
+        return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+      }
+
+      function toggleFullscreen() {
+        const docEl = document.documentElement;
+        if (!isFullscreen()) {
+          if (docEl.requestFullscreen) {
+            docEl.requestFullscreen().catch(err => console.log(err));
+          } else if (docEl.webkitRequestFullscreen) {
+            docEl.webkitRequestFullscreen();
+          } else if (docEl.mozRequestFullScreen) {
+            docEl.mozRequestFullScreen();
+          } else if (docEl.msRequestFullscreen) {
+            docEl.msRequestFullscreen();
+          }
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen().catch(err => console.log(err));
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+          } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+          }
+        }
+      }
+
+      function updateFullscreenIcon() {
+        const btn = document.getElementById('btn-toggle-fullscreen');
+        if (!btn) return;
+        if (isFullscreen()) {
+          btn.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
+            </svg>
+          `;
+          btn.title = "Keluar dari Layar Penuh";
+        } else {
+          btn.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+            </svg>
+          `;
+          btn.title = "Layar Penuh (Sembunyikan URL & Tab)";
+        }
+      }
+
+      function initFullscreenEvents() {
+        const btn = document.getElementById('btn-toggle-fullscreen');
+        if (btn) {
+          btn.addEventListener('click', () => {
+            toggleFullscreen();
+            if (!isFullscreen()) {
+              showToast('Layar penuh aktif! URL & tab disembunyikan ✨');
+            } else {
+              showToast('Keluar dari layar penuh');
+            }
+          });
+        }
+
+        ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach(evt => {
+          document.addEventListener(evt, updateFullscreenIcon);
+        });
+      }
+
+      // ==========================================
       // INITIALIZATION
       // ==========================================
       function init() {
         updateGreetingAndDate();
         updateStats();
         initTabNavigation();
+        initFullscreenEvents();
         initTaskEvents();
         initFocusEvents();
         initJournalEvents();
